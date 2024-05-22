@@ -90,6 +90,10 @@ socket.on('firstmessage',(message)=>{
 //     socket.emit('message',"Sending message after 10 seconds")
 // }, 10000);
 
+socket.on('disconnect',()=>{
+    socket.broadcast.emit('message',{sender:socket.id,message:'User disconnected'})
+})
+
 });
 
 
