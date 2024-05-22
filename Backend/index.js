@@ -31,7 +31,7 @@ io.on('connection', (socket) => {
 
 
 //   socket.broadcast.emit send message to all the sockets connected to the io except the socket it recieved the message from
-  socket.broadcast.emit('message',`User ${socket.id} connected`)
+  socket.broadcast.emit('message',{sender:'SocketIoApp',message:`User ${socket.id} connected`})
 
 
 //   socket.on listens to the message from the socket
@@ -43,9 +43,25 @@ socket.on('firstmessage',(message)=>{
 
   })
 
-  socket.on('message',(message)=>{
+  socket.on('message',({message,userid,roomid})=>{
     console.log(message)
-    socket.broadcast.emit('message',socket.id + " " +message)
+    if (userid===''&&roomid===''){
+
+        socket.broadcast.emit('message',{sender:socket.id,message:message})
+        }
+
+        else if(userid===''&&roomid!==''){
+        socket.to(roomid).emit('message',{message,sender:socket.id})
+        }
+        else if(userid==''&&roomid!==''){
+        socket.to(userid).emit('message',{message,sender:socket.id})
+
+        }
+
+    else{
+        socket.to(userid).emit('message',{message,sender:socket.id})
+        socket.to(roomid).emit('message',{message,sender:socket.id})
+    }
 
   })
   socket.on('personalmessage',({message,roomid})=>{
@@ -67,7 +83,7 @@ socket.on('firstmessage',(message)=>{
 
   socket.on('joinroom',(roomid)=>{
     socket.join(roomid)
-    io.emit('message',socket.id+' joined room '+roomid)
+    io.emit('message',{sender:socket.id,message:' joined room '+roomid})
   })
 
 //   setTimeout(() => {
