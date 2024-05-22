@@ -23,18 +23,18 @@ function App() {
   const [data,setInput] = useState({message:'',userid:'',roomid:'' })
   const [groupmessages,setgroupMessages] = useState([])
   const [personalmessages,setpersonalMessages] = useState([])
+  const [messages,setmessages] = useState([])
   
 
   const inputhandler = (e)=>{
-    // console.log(data)
     setInput({...data,[e.target.name]:e.target.value})
   }
 
   const sendmessagehandler = (e)=>{
-    // console.log(e)
     e.preventDefault()
-    // socket.emit('message',data)
-    
+    socket.emit('message',data)
+    setInput({message:'',roomid:'',userid:''})
+
     // if(data.userid ===''&&data.roomid===''){
     //   socket.emit('groupmessage',data.message)
     // }
@@ -42,12 +42,10 @@ function App() {
     //   socket.emit('personalmessage',data)
     // } 
 
-    socket.emit('personalmessage',{message:data.message,roomid:data.userid})
-    setInput({message:'',roomid:'',userid:''})
   }
 
   const joinroomhandler = (e)=>{
-    socket.emit('joinroom',data.roomid)
+    socket.emit('joinroom',data)
     setInput({message:'',roomid:'',userid:''})
 
 
@@ -107,6 +105,10 @@ function App() {
 
     socket.on('message',(message)=>{
       console.log(message)
+      setmessages((prevMessages) => [...prevMessages,  message ])
+
+      
+
     })
 
    
@@ -126,7 +128,7 @@ function App() {
 
 
 
-socket.on('groupmessage',(message)=>{
+socket.on('groupmessage',(data)=>{
   // console.log(message)
   // let newmessages = [...groupmessages]
   // console.log(newmessages)
@@ -149,8 +151,11 @@ socket.on('groupmessage',(message)=>{
 
   // setgroupMessages(newestmessages)
   // setgroupMessages([...groupmessages, { message }])
-  setgroupMessages((prevMessages) => [...prevMessages, { message }])
+  setmessages((prevMessages) => [...prevMessages, { data }])
+
 })
+// setgroupMessages((prevMessages) => [...prevMessages, { message }]
+
 
 
   
@@ -172,7 +177,7 @@ socket.on('groupmessage',(message)=>{
   </div>
   <div className="mb-3">
     <label htmlFor="exampleInputUser" className="form-label">Userid</label>
-    <input type="text" className="form-control" value={data.userid} onChange={inputhandler} name='userid' id="exampleInputRoom" aria-describedby="emailHelp"/>
+    <input type="text" className="form-control" value={data.userid} onChange={inputhandler} name='userid' id="exampleInputUser" aria-describedby="emailHelp"/>
   </div>
   <div className="mb-3">
     <label htmlFor="exampleInputRoom" className="form-label">Roomid</label>
@@ -184,10 +189,10 @@ socket.on('groupmessage',(message)=>{
 </form>
 </div>
 
-{groupmessages.length !== 0 &&
+{messages.length !== 0 &&
         <div className='container'>
           <ul>
-          {groupmessages.map((message, index) => <li key={index}>{message.message}</li>)}
+          {messages.map((data, index) => <li key={index}>{data.sender +' '+data.message}</li>)}
           </ul>
         </div>
       }
